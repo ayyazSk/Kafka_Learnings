@@ -1,0 +1,5 @@
+com\example\kafka_test\domain\LibraryEvent.class
+com\example\kafka_test\domain\Book.class
+com\example\kafka_test\KafkaLearningsApplication.class
+com\example\kafka_test\enums\libraryEventType.class
+com\example\kafka_test\controller\LibraryEventController.class
