@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Component
 @Slf4j
@@ -34,6 +35,9 @@ public class LibraryEventProducer {
         var key = libraryEvent.libraryEventId();
         var value = obj.writeValueAsString(libraryEvent);
 
+        // 1. for very first call  to kafka template there is blocking call that happens to get metadata of kafka cluster
+        // 2. once kafka cluster details are received send msg happens and completable future is returned
+
     var completableFuture =   kafkaTemplate.send(topicName,key,value );
        return completableFuture.whenComplete((sendResult , throwable) ->{
             if(throwable !=null){
@@ -43,6 +47,21 @@ public class LibraryEventProducer {
                 handleSuccess(key,value,sendResult);
             }
         } );
+
+    }
+
+
+    public SendResult<Integer, String> publishLibraryEvent_approach2(LibraryEvent libraryEvent) throws ExecutionException, InterruptedException {
+
+        var key = libraryEvent.libraryEventId();
+        var value = obj.writeValueAsString(libraryEvent);
+
+        // blocking call happens to get cluster meta data
+        //1.  blocks and waits till message is sent !
+        var sendResult =   kafkaTemplate.send(topicName,key,value ).get();
+        handleSuccess(key,value,sendResult);
+
+        return sendResult;
 
     }
 
